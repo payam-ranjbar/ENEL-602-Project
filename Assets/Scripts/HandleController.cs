@@ -19,9 +19,13 @@ namespace DefaultNamespace
         [Header("Sensitivity")] [SerializeField]
         private float positionFeedbackThreshold;
         [SerializeField] private float velocityFeedbackThreshold;
-        public UnityEvent<float> onVelocityFeedback;
-        public UnityEvent<float> onPositionFeedback;
+        public UnityEvent onVelocityFeedback;
+        public UnityEvent onPositionFeedback;
         [SerializeField] private LockEvent @event;
+
+
+        private bool _velcoityFeedbackInvoked;
+        private bool _positionFeedbackInvoked;
         public float Velocity { get; private set; }
         private float HandleX => handleTransform.position.x;
 
@@ -87,8 +91,32 @@ namespace DefaultNamespace
             var positionFeedback = positionIntensity <= positionFeedbackThreshold;
             var velocityFeedback = velocityIntensity <= velocityFeedbackThreshold;
 
-            if (velocityFeedback) onVelocityFeedback?.Invoke(velocityIntensity);
-            if (positionFeedback) onPositionFeedback?.Invoke(positionIntensity);
+            if (velocityFeedback)
+            {
+                if (!_velcoityFeedbackInvoked)
+                {
+                    onVelocityFeedback?.Invoke();
+                    _velcoityFeedbackInvoked = true;
+                }
+            }
+            else
+            {
+                _velcoityFeedbackInvoked = false;
+            }
+
+            if (positionFeedback)
+            {
+                if (!_positionFeedbackInvoked)
+                {
+                    onPositionFeedback?.Invoke();
+                    _positionFeedbackInvoked = true;
+                }
+            }
+            else
+            {
+                _positionFeedbackInvoked = false;
+
+            }
         }
         private IEnumerator CheckWin()
         {

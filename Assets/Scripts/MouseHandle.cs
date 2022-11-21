@@ -12,6 +12,7 @@ public class MouseHandle : InputHandler
     private bool _isMouseDown;
     private int _mouseDir;
     private float _lastXPos;
+    [SerializeField] private float dragEffectThreshold = 0.1f;
 
     private float MinBound => xMovementBounds.x;
     private float MaxBound => xMovementBounds.y;
@@ -24,11 +25,12 @@ public class MouseHandle : InputHandler
     private void Start()
     {
         _camera = Camera.main;
+        StartCoroutine(CalculateMouseDir());
     }
 
     private void OnMouseDown()
     {
-        Debug.Log("Clicked");
+        _isMouseDown = true;
         var position = transform.position;
         _screenPoint = _camera.WorldToScreenPoint(position);
         _offset = position - _camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, _screenPoint.y, _screenPoint.z));
@@ -38,6 +40,7 @@ public class MouseHandle : InputHandler
     private void OnMouseUp()
     {
         onHandleReleased?.Invoke();
+        _isMouseDown = false;
     }
 
     private void OnMouseDrag()
@@ -63,6 +66,10 @@ public class MouseHandle : InputHandler
             _lastXPos = Input.mousePosition.x;
             yield return null;
             SetMouseDir();
+            if (ReachedLeftBound() && ReachedRightBound()) continue;
+            if (!_isMouseDown || MouseIsStationary) continue;
+            yield return new WaitForSeconds(dragEffectThreshold);
+            onHandleDrag?.Invoke();
         }
     }
     private void SetMouseDir()
