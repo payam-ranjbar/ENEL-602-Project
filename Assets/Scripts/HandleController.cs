@@ -24,13 +24,14 @@ namespace DefaultNamespace
         public UnityEvent onPositionFeedback;
 
         [SerializeField] private GameStatus gameStatus;
-        [SerializeField] private DecodeData @event;
+        [SerializeField] private DecodeData data;
 
 
         private bool _velcoityFeedbackInvoked;
         private bool _positionFeedbackInvoked;
-        
-        
+        private float _percentage;
+
+
         public float Velocity { get; private set; }
         private float HandleX => handleTransform.position.x;
 
@@ -40,6 +41,7 @@ namespace DefaultNamespace
             StartCoroutine(GetVelocity());
             AdjustInitialPositionOfHandle();
             RotateCircle();
+            data = gameStatus.CurrentData;
         }
 
         private void AdjustInitialPositionOfHandle()
@@ -90,9 +92,11 @@ namespace DefaultNamespace
 
         private void FeedBacks()
         {
-            var desiredX = Mathf.InverseLerp(xMovementBounds.x, xMovementBounds.y, @event.percentageToActive);
-            var positionIntensity = Mathf.Abs( desiredX - HandleX);
-            var velocityIntensity = Mathf.Abs(Mathf.Abs(Velocity) - @event.requiredVelocity);
+            _percentage = GetPercentage();
+
+            var desiredX = Mathf.InverseLerp(xMovementBounds.x, xMovementBounds.y, data.percentageToActive);
+            var positionIntensity = Mathf.Abs(data.percentageToActive - _percentage);
+            var velocityIntensity = Mathf.Abs(Mathf.Abs(Velocity) - data.requiredVelocity);
             
             var positionFeedback = positionIntensity <= positionFeedbackThreshold;
             var velocityFeedback = velocityIntensity <= velocityFeedbackThreshold;
@@ -126,9 +130,9 @@ namespace DefaultNamespace
         }
         private IEnumerator CheckWin()
         {
-            var percentage = GetPercentage();
-            var reachedPosition = Mathf.Abs(@event.percentageToActive - percentage) <= positionSensitivity;
-            var reachVelocity = Mathf.Abs(Mathf.Abs(Velocity) - @event.requiredVelocity) <= velocitySensitivity;
+             _percentage = GetPercentage();
+            var reachedPosition = Mathf.Abs(data.percentageToActive - _percentage) <= positionSensitivity;
+            var reachVelocity = Mathf.Abs(Mathf.Abs(Velocity) - data.requiredVelocity) <= velocitySensitivity;
 
             if (reachedPosition)
             {
@@ -184,16 +188,18 @@ namespace DefaultNamespace
         {
             if (!Input.GetKeyDown(KeyCode.Space)) return;
 
-            if (!_positionFeedbackInvoked || _velcoityFeedbackInvoked)
+            if (!_positionFeedbackInvoked || !_velcoityFeedbackInvoked)
             {
                 // error
                 gameStatus.Error();
                 return;
             }
-
-            gameStatus.Decode();
+            var newData = gameStatus.Decode();
+            if (newData != null) data = newData;
+            _positionFeedbackInvoked = false;
+            _velcoityFeedbackInvoked = false;
             AdjustInitialPositionOfHandle();
-            UpdateVelocity = false;
+            // UpdateVelocity = false;
             //win
 
         }

@@ -22,6 +22,8 @@ public class LockEffects : MonoBehaviour
         [SerializeField] private float camZoomDuration = 0.5f;
         [SerializeField] private float camZoomBackDuration = 1f;
         [SerializeField] private float camDefaultFov = 62;
+
+        private bool _rotating;
         public void LockSubtleShake(float intensity)
         {
                 var shakeAmplitude = intensity * subtleShakeStrength;
@@ -30,7 +32,11 @@ public class LockEffects : MonoBehaviour
 
         public void LockRotationShake()
         {
-                lockTransform.DOPunchRotation(rotationShakeStrength * Vector3.one, rotationShakeDuration, rotationShakeVibrations);
+                if(_rotating ) return;
+                _rotating = true;
+                lockTransform.DOPunchRotation(rotationShakeStrength * Vector3.one, rotationShakeDuration,
+                                rotationShakeVibrations)
+                        .onComplete += () => _rotating = false;
         }
         
         public void CameraShake()=> Camera.main.DOShakePosition(camShakeDuration, camShakeStrength, camShakeVibrations);
