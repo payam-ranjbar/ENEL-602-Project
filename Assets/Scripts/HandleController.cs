@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -21,11 +22,15 @@ namespace DefaultNamespace
         [SerializeField] private float velocityFeedbackThreshold;
         public UnityEvent onVelocityFeedback;
         public UnityEvent onPositionFeedback;
-        [SerializeField] private LockEvent @event;
+
+        [SerializeField] private GameStatus gameStatus;
+        [SerializeField] private DecodeData @event;
 
 
         private bool _velcoityFeedbackInvoked;
         private bool _positionFeedbackInvoked;
+        
+        
         public float Velocity { get; private set; }
         private float HandleX => handleTransform.position.x;
 
@@ -48,6 +53,8 @@ namespace DefaultNamespace
         private void Update()
         {
             if(UpdateVelocity) RotateCircle();
+            
+            UnlockTheLock();
         }
 
         private void OnEnable()
@@ -83,9 +90,8 @@ namespace DefaultNamespace
 
         private void FeedBacks()
         {
-            var percentage = GetPercentage();
-            
-            var positionIntensity = Mathf.Abs(@event.percentageToActive - percentage);
+            var desiredX = Mathf.InverseLerp(xMovementBounds.x, xMovementBounds.y, @event.percentageToActive);
+            var positionIntensity = Mathf.Abs( desiredX - HandleX);
             var velocityIntensity = Mathf.Abs(Mathf.Abs(Velocity) - @event.requiredVelocity);
             
             var positionFeedback = positionIntensity <= positionFeedbackThreshold;
@@ -135,7 +141,6 @@ namespace DefaultNamespace
             }
             if (reachedPosition && reachVelocity)
             {
-                @event.Trigger();
                 Debug.Log("Win");
             }
 
@@ -173,6 +178,24 @@ namespace DefaultNamespace
             var newRotation = Quaternion.AngleAxis(angle, Vector3.forward);
             
             circleTransform.rotation = newRotation;
+        }
+
+        private void UnlockTheLock()
+        {
+            if (!Input.GetKeyDown(KeyCode.Space)) return;
+
+            if (!_positionFeedbackInvoked || _velcoityFeedbackInvoked)
+            {
+                // error
+                gameStatus.Error();
+                return;
+            }
+
+            gameStatus.Decode();
+            AdjustInitialPositionOfHandle();
+            UpdateVelocity = false;
+            //win
+
         }
     }
 }
