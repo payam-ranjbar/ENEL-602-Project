@@ -42,7 +42,6 @@ namespace DefaultNamespace
             AdjustInitialPositionOfHandle();
             RotateCircle();
             data = gameStatus.CurrentData;
-            DataGatherer.Instance.Init();
         }
 
         private void AdjustInitialPositionOfHandle()

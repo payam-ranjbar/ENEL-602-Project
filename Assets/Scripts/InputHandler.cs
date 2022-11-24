@@ -8,4 +8,6 @@ public abstract class InputHandler : MonoBehaviour
     [SerializeField] public UnityEvent onHandleReleased;
     [SerializeField] public UnityEvent onHandleDrag;
 
+    protected abstract void OnHandleDown();
+
 }

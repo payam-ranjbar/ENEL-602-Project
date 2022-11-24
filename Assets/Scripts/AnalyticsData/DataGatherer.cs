@@ -1,5 +1,7 @@
 ﻿
+using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace AnalyticsData
 {
@@ -11,6 +13,8 @@ namespace AnalyticsData
         private float _snapTime;
 
         private bool _init;
+
+        private int _fails;
         private void Awake()
         {
             _currentData = new Diagnostics();
@@ -18,8 +22,9 @@ namespace AnalyticsData
 
         public void Init()
         {
+            if(_init) return;
             _init = true;
-            _currentData = new Diagnostics {Participant = "Participant"};
+            _currentData = new Diagnostics {Participant = "Unknown Participant"};
             _snapTime = Time.unscaledTime;
 
         }
@@ -32,6 +37,9 @@ namespace AnalyticsData
 
             _currentData.FirstCodeDuration = firstDuration;
 
+            _currentData.FailsLevel1 = _fails;
+            _fails = 0;
+            
             _snapTime = Time.unscaledTime;
         }
 
@@ -42,7 +50,8 @@ namespace AnalyticsData
             var secondDuration = Time.unscaledTime - _snapTime;
 
             _currentData.SecondCodeDuration = secondDuration;
-
+            _currentData.FailsLevel2 = _fails;
+            _fails = 0;
             _snapTime = Time.unscaledTime;
         }
 
@@ -54,14 +63,15 @@ namespace AnalyticsData
             var thirdDuration = Time.unscaledTime - _snapTime;
 
             _currentData.ThirdCodeDuration = thirdDuration;
-
+            _currentData.FailsLevel3 = _fails;
+            _fails = 0;
             _snapTime = Time.unscaledTime;
         }
 
         public void AddFails()
         {
             if(!_init) return;
-            _currentData.Fails++;
+            _fails++;
         }
 
         public void FinilizeRun()
@@ -69,6 +79,16 @@ namespace AnalyticsData
             _init = false;
             CSVSerializer.Create(_currentData);
         }
-        
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.F2)) Restart();
+            if(Input.GetKeyDown(KeyCode.F3)) Init();
+        }
+
+        private void Restart()
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 }

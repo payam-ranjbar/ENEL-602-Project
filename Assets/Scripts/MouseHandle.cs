@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using AnalyticsData;
 using UnityEngine;
 
 public class MouseHandle : InputHandler
@@ -35,6 +36,7 @@ public class MouseHandle : InputHandler
         _screenPoint = _camera.WorldToScreenPoint(position);
         _offset = position - _camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, _screenPoint.y, _screenPoint.z));
         onHandleClicked?.Invoke();
+        OnHandleDown();
     }
 
     private void OnMouseUp()
@@ -81,4 +83,8 @@ public class MouseHandle : InputHandler
         
     private bool ReachedLeftBound() => X <= MinBound;
     private bool ReachedRightBound() => X >=  MaxBound;
+    protected override void OnHandleDown()
+    {
+        DataGatherer.Instance.Init();
+    }
 }

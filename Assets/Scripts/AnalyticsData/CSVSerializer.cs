@@ -12,11 +12,11 @@ namespace AnalyticsData
             var filePath =  Path + "/" + FileName + ".csv";
             string content =  data.SerializeToCSV();
             
-            var header = "First Decode,Second Decode,Third Decode,Duration,Fails";
+            var header = "Participant,Total Time,Total Fails,First Decode,Second Decode,Third Decode,Fails Lvl 1,Fails Lvl 2, Fails Lvl 2";
 
             if (File.Exists(filePath))
             {
-                using var sw1 = new StreamWriter(filePath, false, Encoding.UTF8);
+                using var sw1 = new StreamWriter(filePath, true, Encoding.UTF8);
                 sw1.WriteLine(content);
                 sw1.Flush();
                 sw1.Close();

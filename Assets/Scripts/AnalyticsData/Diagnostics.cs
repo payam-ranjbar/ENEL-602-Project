@@ -8,8 +8,21 @@ namespace AnalyticsData
        private float _firstCodeDuration;
        private float _secondCodeDuration;
        private float _thirdCodeDuration;
-       private int _fails;
+       private int _failsLevel1;
+       private int _failsLevel2;
+       private int _failsLevel3;
 
+       public int FailsLevel2
+       {
+           get => _failsLevel2;
+           set => _failsLevel2 = value;
+       }
+
+       public int FailsLevel3
+       {
+           get => _failsLevel3;
+           set => _failsLevel3 = value;
+       }
 
        public string Participant
        {
@@ -35,17 +48,19 @@ namespace AnalyticsData
            set => _thirdCodeDuration = value;
        }
 
-       public int Fails
+       public int FailsLevel1
        {
-           get => _fails;
-           set => _fails = value;
+           get => _failsLevel1;
+           set => _failsLevel1 = value;
        }
 
 
        public string SerializeToCSV()
-        {
-            var str = $"{_participant},{_firstCodeDuration},\"{_secondCodeDuration}\",\"{_thirdCodeDuration}\",\"{_fails}\"";
-            return SerializeToCSV();
+       {
+           var totalDuration = _firstCodeDuration + _secondCodeDuration + _thirdCodeDuration;
+           var totalFails = _failsLevel1 + _failsLevel2 + _failsLevel3;
+            var str = $"{_participant},{totalDuration},\"{totalFails}\",\"{_firstCodeDuration}\",\"{_secondCodeDuration}\",\"{_thirdCodeDuration}\",\"{_failsLevel1}\",\"{_failsLevel2}\",\"{_failsLevel3}\"";
+            return str;
         }
 
     }
