@@ -10,6 +10,7 @@ namespace AnalyticsData
 
         private float _snapTime;
 
+        private bool _init;
         private void Awake()
         {
             _currentData = new Diagnostics();
@@ -17,16 +18,16 @@ namespace AnalyticsData
 
         public void Init()
         {
+            _init = true;
             _currentData = new Diagnostics {Participant = "Participant"};
+            _snapTime = Time.unscaledTime;
+
         }
 
         public void FistDecodeStarts()
         {
-            _snapTime = Time.unscaledTime;
-        }
+            if(!_init) return;
 
-        public void SecondDecodeStarts()
-        {
             var firstDuration = Time.unscaledTime - _snapTime;
 
             _currentData.FirstCodeDuration = firstDuration;
@@ -34,8 +35,10 @@ namespace AnalyticsData
             _snapTime = Time.unscaledTime;
         }
 
-        public void ThirdDecodeStarts()
+        public void SecondDecodeStarts()
         {
+            if(!_init) return;
+
             var secondDuration = Time.unscaledTime - _snapTime;
 
             _currentData.SecondCodeDuration = secondDuration;
@@ -43,8 +46,11 @@ namespace AnalyticsData
             _snapTime = Time.unscaledTime;
         }
 
+
         public void Win()
         {
+            if(!_init) return;
+
             var thirdDuration = Time.unscaledTime - _snapTime;
 
             _currentData.ThirdCodeDuration = thirdDuration;
@@ -54,11 +60,13 @@ namespace AnalyticsData
 
         public void AddFails()
         {
+            if(!_init) return;
             _currentData.Fails++;
         }
 
         public void FinilizeRun()
         {
+            _init = false;
             CSVSerializer.Create(_currentData);
         }
         

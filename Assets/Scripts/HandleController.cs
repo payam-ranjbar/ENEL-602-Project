@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using AnalyticsData;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -41,6 +42,7 @@ namespace DefaultNamespace
             AdjustInitialPositionOfHandle();
             RotateCircle();
             data = gameStatus.CurrentData;
+            DataGatherer.Instance.Init();
         }
 
         private void AdjustInitialPositionOfHandle()
@@ -193,13 +195,14 @@ namespace DefaultNamespace
                 gameStatus.Error();
                 return;
             }
+            
             var newData = gameStatus.Decode();
             if (newData != null) data = newData;
+            
             _positionFeedbackInvoked = false;
             _velcoityFeedbackInvoked = false;
             AdjustInitialPositionOfHandle();
-            // UpdateVelocity = false;
-            //win
+
 
         }
     }
